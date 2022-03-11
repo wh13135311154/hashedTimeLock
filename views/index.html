@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html>
+
+ <head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <h1 style="text-align: center;">test for hashed time lock contract</h1>
+ 
+ </head> 
+<
+ <body>
+<script type="text/javascript" >
+  function erc20ToErc20() {
+	const {assertEqualBN} = require('./helper/assert')
+	const {
+	  bufToStr,
+	  htlcERC20ArrayToObj,
+	  isSha256Hash,
+	  newSecretHashPair,
+	  nowSeconds,
+	  random32,
+	  txContractId,
+	  txLoggedArgs,
+	} = require('./helper/utils')
+
+	const HashedTimelockERC20 = artifacts.require('./HashedTimelockERC20.sol')
+	const AliceERC20 = artifacts.require('./helper/AliceERC20.sol')
+	
+	const hourSeconds = 3600
+	const timeLock1Hour = nowSeconds() + hourSeconds
+	const tokenAmount = 5
+
+
+	contract('HashedTimelock swap between two ERC20 tokens', accounts => {
+  const Alice = accounts[1] // owner of AliceERC20 and wants swap for BobERC20
+  const Bob = accounts[2] // owner of BobERC20 and wants to swap for AliceERC20
+
+  const tokenSupply = 1000
+  const senderInitialBalance = 100
+
+  let htlc
+  let AliceERC20
+  let BobERC20
+  let hashPair // shared b/w the two swap contracts in both directions
+  let a2bSwapId // swap contract ID for Alice -> Bob in the AliceERC20
+  let b2aSwapId // swap contract ID for Bob -> Alice in the BobERC20
+  // use a variable to track the secret Bob will have learned from Alice's withdraw transaction
+  // to make the flow more explicitly reflect the real world sequence of events
+  let learnedSecret
+
+  before(async () => {
+    // if both tokens run on the same chain, they can share the HTLC contract to
+    // coordinate the swap. They can also use separate instances on the same chain,
+    // or even separate instances on different chains.
+    // The key is the HTLC contract must be running on the same chain
+    // that the target Token to be transferred between the two counterparties runs on
+    htlc =  HashedTimelockERC20.new()
+
+    AliceERC20 =  AliceERC20TokenContract.new(tokenSupply)
+    BobERC20 =  BobERC20TokenContract.new(tokenSupply)
+     AliceERC20.transfer(Alice, senderInitialBalance) // so Alice has some tokens to trade
+     BobERC20.transfer(Bob, senderInitialBalance) // so Bob has some tokens to trade
+
+    hashPair = newSecretHashPair()
+  })
+  
+   timeLockSeconds = nowSeconds() + 2
+   const newASwapTx =  newSwap(AliceERC20, htlc, {hashlock: hashPair.hash, timelock: timeLockSeconds}, Alice, Bob)
+   a2bSwapId = txContractId(newASwapTx)
+   
+   
+   timeLockSeconds = nowSeconds() + 2
+   const newBSwapTx =  newSwap(BobERC20, htlc, {hashlock: hashPair.hash, timelock: timeLockSeconds}, Bob, Alice)
+   b2aSwapId = txContractId(newBSwapTx)
+   
+   
+    htlc.withdraw(b2aSwapId, hashPair.secret, {
+      from: Alice,
+    })
+   
+    learnedSecret = contract.preimage
+    
+     htlc.withdraw(a2bSwapId, learnedSecret, {
+      from: Bob,
+    })
+})
+}
+</script>
+ <div style="text-align: center;">
+  <button onclick="erc20ToErc20()">ERC20ToERC20</button>
+  </div>
+   <div style="text-align: center;">
+  <button>ERC721ToERC20</button>
+  </div>
+   <div style="text-align: center;">
+  <button>ERC721ToERC721</button>
+  </div>
+ </body>
+
+ </html>
