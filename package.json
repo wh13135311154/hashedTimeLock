@@ -1,0 +1,46 @@
+{
+  "name": "hashedTimeLock",
+  "version": "0.0.1",
+  "description": "Hashed Timelock Contracts for Ethereum",
+  "main": "truffle.js",
+  "license": "GPL-3.0",
+  "repository": "chatch/hashed-timelock-contract-ethereum",
+  "bugs": {
+    "url": "https://github.com/wh13135311154/hashedTimeLock/issues"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "start": "ganache-cli --networkId 4447 --port 7545",
+    "test": "truffle test",
+    "compile": "truffle compile",
+    "startWeb": "node ./bin/www"
+  },
+  "keywords": [
+    "ethereum",
+    "hashed-timelock-contract",
+    "solidity",
+    "smart-contract"
+  ],
+  "dependencies": {
+    "@truffle/contract": "^4.2.14",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "ejs": "^3.1.6",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1",
+    "openzeppelin-solidity": "^2.5.1",
+    "realm": "^2.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.5.0",
+    "ethlint": "^1.2.5",
+    "ganache-cli": "^6.12.2",
+    "truffle": "^5.1.36",
+    "truffle-assertions": "^0.9.2"
+  }
+}
